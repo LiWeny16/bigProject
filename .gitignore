@@ -1,5 +1,7 @@
 /node_modules/*
-/nohup.out
-/config.js
-/config.json
-/*.log
+nohup.out
+config.js
+config.json
+*.log
+/SSLcer/*
+/uploadFiles/*
