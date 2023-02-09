@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Onion's reguser page</title>
+	<link rel="stylesheet" href="./css/reguser.css">
+	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+</head>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bigonion-kit@0.9.9/umd/umd-kit.js"></script>
+<script src="./ajaxConfig.js"></script>
+
+<body>
+	<div class="box">
+		<form class="formTable" autocomplete="off" action="" method="post" enctype="application/x-www-form-urlencoded"
+			spellcheck="false">
+			<h2 id="Sign">Sign up</h2>
+			<div class="inputBox" autocomplete="off">
+				<input class="inputFrame" type="text" required="required" name="email">
+				<span>邮箱</span>
+				<i></i>
+			</div>
+			<div class="inputBox" autocomplete="off">
+				<input class="inputFrame" type="text" required="required" name="username">
+				<span>Username</span>
+				<i></i>
+			</div>
+			<div class="inputBox" autocomplete="off">
+				<input class="inputFrame" type="password" required="required" name="password">
+				<span>Password</span>
+				<i></i>
+			</div>
+			<div class="inputBox" autocomplete="off">
+				<input class="inputFrame" type="text" required="required" name="verifyCode">
+				<button class="veriButton">发送</button>
+				<span>验证码</span>
+				<i></i>
+			</div>
+
+			<div class="links">
+				<a href="#">Forgot Password ?</a>
+				<a href="./login.html">Signin</a>
+			</div>
+			<input id="submit" onclick="return false " type="submit" value="Sign">
+		</form>
+	</div>
+</body>
+<script src="./js/reguser.js"></script>
+<script>
+	let formSubmit = document.getElementById('submit')
+	let veriSubmit = document.getElementsByClassName('veriButton')[0]
+	formSubmit.onclick = (e) => {
+		e.preventDefault()
+		let email = findClass('inputFrame')[0].value
+		let username = findClass('inputFrame')[1].value
+		let password = findClass('inputFrame')[2].value
+		let veriCode = findClass('inputFrame')[3].value
+
+		let emailCheck = email.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/) ? true : false
+		let usernameCheck = username.match(/^[a-zA-Z0-9\u4e00-\u9fa5]{2,15}$/g) ? true : false
+		let passCheck = password.match(/^[a-zA-Z0-9]{5,15}$/g) ? true : false
+		let veriCodeCheck = veriCode.match(/^[a-zA-Z0-9]{6,6}$/g) ? true : false
+
+		if (emailCheck && usernameCheck && passCheck && veriCodeCheck) {
+			var formData = $('.formTable').serialize()
+			$.ajax({
+				type: "post",
+				async: false,
+				url: `${cpolarURL}/api/reguser`,
+				data: formData,
+				// 指定参数的格式类型
+				contentType: 'application/x-www-form-urlencoded',
+				success: function (res) {
+					if (res.msg == undefined) {
+						res = JSON.stringify(res)
+						res = res.replace(/\s*\\n\s*/g, '')
+						console.log(res)
+						alert(res.match(/\{.+?(?<=\})/))
+					}
+					else {
+						alert(res.msg)
+					}
+					if (res.status === 1) {
+						window.location.replace(`${cpolarURL}/login.html`)
+					}
+				},
+				error: function (xhr) {
+					console.log(xhr)
+				}
+
+			})
+		}
+		else if (!emailCheck) {
+			alert('邮箱不合法，请输入正确的邮箱地址！')
+		}
+		else if (!usernameCheck) {
+			alert('用户名不合法！请输入由中文、字母、数字2-15位组成的名字')
+		}
+		else if (!passCheck) {
+			alert('密码不合法！请输入5到15位数字字母组合的密码')
+		}
+		else if (!veriCodeCheck) {
+			alert('验证码不合法！请输入正确的验证码')
+		}
+
+	}
+	veriSubmit.onclick = (e) => {
+		e.preventDefault()
+		let email = findClass('inputFrame')[0].value
+		let username = findClass('inputFrame')[1].value
+		let password = findClass('inputFrame')[2].value
+		let veriCode = findClass('inputFrame')[3].value
+
+		let emailCheck = email.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/) ? true : false
+		let usernameCheck = username.match(/^[a-zA-Z0-9\u4e00-\u9fa5]{2,15}$/g) ? true : false
+		let passCheck = password.match(/^[a-zA-Z0-9]{5,15}$/g) ? true : false
+		let veriCodeCheck = veriCode.match(/^[a-zA-Z0-9]{6,6}$/g) ? true : false
+
+		if (emailCheck && usernameCheck && passCheck) {
+			var formData = $('.formTable').serialize()
+			$.ajax({
+				type: "post",
+				async: false,
+				url: `${cpolarURL}/mail/sendMail`,
+				data: formData,
+				// 指定参数的格式类型
+				contentType: 'application/x-www-form-urlencoded',
+				success: function (res) {
+					if (res.msg == undefined) {
+						res = JSON.stringify(res)
+						res = res.replace(/\s*\\n\s*/g, '')
+						console.log(res)
+						alert(res.match(/\{.+?(?<=\})/))
+					}
+					else {
+						alert(res.msg)
+					}
+				},
+				error: function (xhr) {
+					console.log(xhr)
+				}
+			})
+		}
+		else if (!emailCheck) {
+			alert('邮箱不合法，请输入正确的邮箱地址！')
+		}
+		else if (!usernameCheck) {
+			alert('用户名不合法！请输入由中文、字母、数字2-15位组成的名字')
+		}
+		else if (!passCheck) {
+			alert('密码不合法！请输入5到15位数字字母组合的密码')
+		}
+
+	}
+
+
+</script>
+
+</html>

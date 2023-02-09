@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Onion's login page</title>
+	<link rel="stylesheet" href="./css/login.css">
+	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+</head>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bigonion-kit@0.9.9/umd/umd-kit.js"></script>
+<script src="./ajaxConfig.js"></script>
+
+<body>
+	<div class="box">
+		<form id="formTable" autocomplete="off" action="http://127.0.0.1/api/login" method="post"
+			enctype="application/x-www-form-urlencoded">
+			<h2 id="Sign">Sign in</h2>
+			<div class="inputBox">
+				<input class="inputFrame" type="text" required="required" name="username">
+				<span>Username</span>
+				<i></i>
+			</div>
+			<div class="inputBox">
+				<input class="inputFrame" type="password" required="required" name="password">
+				<span>Password</span>
+				<i></i>
+			</div>
+			<div class="links">
+				<a href="#">Forgot Password ?</a>
+				<a href="./reguser.html">Signup</a>
+			</div>
+			<input id="submit" type="submit" value="Login">
+		</form>
+	</div>
+</body>
+<script>
+	let formSubmit = document.getElementById('submit')
+	var token
+	formSubmit.onclick = (e) => {
+		e.preventDefault()
+		let username = findClass('inputFrame')[0].value
+		let password = findClass('inputFrame')[1].value
+		let usernameCheck = username.match(/^[a-zA-Z0-9\u4e00-\u9fa5]{2,15}$/g) ? true : false
+		let passCheck = password.match(/^[a-zA-Z0-9]{5,15}$/g) ? true : false
+		if (usernameCheck && passCheck) {
+			var formData = $('#formTable').serialize()
+			$.ajax({
+				type: "post",
+				async: false,
+				url: `${cpolarURL}/api/login`,
+				data: formData,
+				// 指定参数的格式类型
+				contentType: 'application/x-www-form-urlencoded',
+				success: function (res) {
+					if (res.token !== undefined) {
+						token = res.token
+						// document.cookie = `token=${token};path=/;max-age=2592000`  //one month
+						kit.setCookie('token', token, 28, '/','.bigonion.cn')
+						kit.setCookie('logedUsername',res.user,28,'/','.bigonion.cn')
+						kit.setCookie('email',res.email,28,'/','.bigonion.cn')
+					}
+					if (res.msg == undefined) {
+						res = JSON.stringify(res)
+						res = res.replace(/\s*\\n\s*/g, '')
+						alert(res.match(/\{.+?(?<=\})/))
+						console.log(res.match(/\{.+?(?<=\})/))
+					}
+					else {
+						alert(res.msg)
+						console.log(res.msg)
+					}
+					if (res.status === 1) {
+						window.location.replace(`https://bigonion.cn`)
+						
+					}
+				},
+				error: function (xhr) {
+					console.log(xhr)
+				}
+
+			})
+		} else if (!usernameCheck) {
+			alert('用户名不合法！请输入由中文、字母、数字2-15位组成的名字')
+		}
+		else if (!passCheck) {
+			alert('密码不合法！请输入5到15位数字字母组合的密码')
+		}
+	}
+
+
+</script>
+
+</html>
